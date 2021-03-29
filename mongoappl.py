@@ -7,7 +7,7 @@ import time
 
 app = Flask(__name__)
 
-app.config['MONGO_URI'] = 'mongodb+srv://harrisjosye:SfVK0uf8fOgIcE3U@cluster0.vspam.mongodb.net/MediGO?retryWrites=true&w=majority'
+app.config['MONGO_URI'] = 'mongodb+srv://<username>:<password>@cluster0.vspam.mongodb.net/MediGO?retryWrites=true&w=majority'
 mongo = PyMongo(app)
 ngos = mongo.db.NGOlist
 modos = mongo.db.MedicineList
