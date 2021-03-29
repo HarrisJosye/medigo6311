@@ -38,6 +38,7 @@ def med_list():
     saved_modos = modos.find()
     return render_template('ngolist.html', todos=saved_modos)
 
+
 if __name__ == "__main__":
     app.run(host='localhost', debug=True)
 
