@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        h1{text-align: center;font-family: verdana;color: white}
+        p{text-align: center;font-family: Optima;color: white}
+        body{text-align: center;font-family: Optima;color: white}
+    </style>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <h1>Sign Up</h1>
+</head>
+<body style="background-color: cadetblue;">
+<p>Please provide your details for making a new account.</p>
+<form method=post action="{{ url_for('signup_page') }}">
+    <dl>
+      <dt>Username:
+      <dd><input type=text name=username value="{{
+          request.form.username }}">
+      <dt>Email Address:
+        <dd><input type=email name=email value="{{ request.form.email }}">
+      <dt>Password:
+      <dd><input type=password name=password value="{{
+          request.form.password }}">
+        <dt>Confirm Password:
+        <dd><input type=password name=confirmpassword value="{{ request.form.confirmpassword }}">
+        <dt>Category:
+        <dd>
+        <select name="category" id="registration" onchange="changetextbox();" >
+            {% for o in userlist %}
+                <option value="{{ o.type }}" >{{ o.type }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="category" id="ssd" />
+            <script type="text/javascript">
+                function changetextbox()
+                {
+                    if (document.getElementById("registration").value == "New user") {
+                        document.getElementById("sdd").disable='true';
+                    } else {
+                        document.getElementById("sdd").disable='';
+                    }
+                }
+            </script>
+    </dl>
+    <p><input type=submit value=SignUp>
+  </form>
+</body>
+</html>
