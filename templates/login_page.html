@@ -12,7 +12,7 @@
 </head>
 <body style="background-color: cadetblue;">
 <p>Please login with your valid credentials.</p>
-<form method=post>
+<form method=post action="{{ url_for('login_page') }}">
     <dl>
       <dt>Username:
       <dd><input type=text name=username value="{{
