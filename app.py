@@ -11,6 +11,8 @@ app.config[
 mongo = PyMongo(app)
 LoginDB = mongo.db.Login
 SignupDB = mongo.db.SignUp
+ngos = mongo.db.NGOlist
+modos = mongo.db.MedicineList
 
 
 @app.route('/')
@@ -29,7 +31,7 @@ def login_page():
         if get_user or get_email:
             if get_password:
                 print("Login successful")
-                return redirect(url_for('welcome_page'))
+                return redirect(url_for('index'))
         else:
             print("Username or password incorrect.")
             return redirect(url_for('login_page'))
@@ -47,6 +49,9 @@ def signup_page():
         password_2 = request.form.get("confirmpassword")
 
         category = request.form.get('category')
+        registrationno = request.form.get('NGOReg')
+        dob = request.form.get('dob')
+        sex = request.form.get('sex')
 
         user_exist = LoginDB.find_one({'Username': request.form['username']})
         email_exist = LoginDB.find_one({'email': request.form['email']})
@@ -58,16 +63,61 @@ def signup_page():
             print("Password and confirm password doesn't match")
             return redirect(url_for('signup_page'))
         else:
-            new_user = ({'Username': request.form['username'], 'Email': request.form['email'], 'Password': password_1,
-                         'Category': category})
+            new_user = ({'Username': request.form['username'], 'Email': request.form['email'], 'Password': password_1,'DOB': dob,'Sex' : sex,
+                         'Category': category, 'Registration Number': registrationno})
             new_user_login = (
                 {'Username': request.form['username'], 'Email': request.form['email'], 'Password': password_1})
             SignupDB.insert(new_user)
             LoginDB.insert(new_user_login)
 
-            return redirect(url_for('welcome_page'))
+            return redirect(url_for('login_page'))
 
     return render_template('signup_page.html', userlist=userlist)
+
+
+@app.route('/index')
+def index():
+    return render_template('indexButton.html')
+
+
+@app.route('/complete/<oid>')
+def complete(oid):
+    try:
+        do_item = ngos.find_one({'_id': ObjectId(oid)})
+        do_item['complete'] = True
+        ngos.save(do_item)
+    except:
+        do_item = modos.find_one({'_id': ObjectId(oid)})
+        do_item['complete'] = True
+        modos.save(do_item)
+    return redirect(url_for('index'))
+
+
+@app.route('/ngo_list')
+def ngo_list():
+    saved_ngos = ngos.find()
+    return render_template('ngolist.html', todos=saved_ngos)
+
+
+@app.route('/med_list')
+def med_list():
+    saved_modos = modos.find()
+    return render_template('ngolist.html', todos=saved_modos)
+
+
+@app.route('/donate')
+def donate():
+    return render_template('medicinedonate.html')
+
+
+@app.route('/add_modo', methods=['POST'])
+def add_modo():
+    new_modo = request.form.get('new-todo')
+    new_todo1 = request.form.get('new-todo1')
+    new_todo2 = request.form.get('new-todo2')
+
+    modos.insert_one({'text': new_modo, 'family': new_todo1, 'ExpDate': new_todo2, 'complete': False})
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
