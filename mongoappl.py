@@ -38,6 +38,19 @@ def med_list():
     saved_modos = modos.find()
     return render_template('ngolist.html', todos=saved_modos)
 
+@app.route('/donate')
+def donate():
+    return render_template('medicinedonate.html')
+
+@app.route('/add_modo', methods=['POST'])
+def add_modo():
+    new_modo = request.form.get('new-todo')
+    new_todo1 = request.form.get('new-todo1')
+    new_todo2 = request.form.get('new-todo2')
+
+    modos.insert_one({'text': new_modo, 'family': new_todo1, 'ExpDate': new_todo2,'complete': False})
+    return redirect(url_for('index'))
+
 
 if __name__ == "__main__":
     app.run(host='localhost', debug=True)
