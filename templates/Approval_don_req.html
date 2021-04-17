@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>ToDo App</title>
+
+		<link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+
+		<!-- Bootstrap CSS -->
+		<!link rel="stylesheet" href="{{ url_for('static', filename='flatly.min.css') }}" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+	</head>
+	<body>
+
+		<div class="container-fluid" id="wrapper">
+
+			<div class="row">
+				<div class="col-lg-4 col-lg-offset-4" id="content">
+					<h2>List</h2>
+					<ul class="list-group t20">
+						{% for todo in todos %}
+						<a href="{{ url_for('App_don')}}">
+							<li class="list-group-item">
+								{{ todo.text }}
+							</li>
+						</a>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,60 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <style>
-        h1{text-align: center;font-family: verdana;color: white}
-        p{text-align: center;font-family: Optima;color: white}
-        body{text-align: center;font-family: Optima;color: white}
-    </style>
     <meta charset="UTF-8">
     <title>Sign Up</title>
     <h1>Sign Up</h1>
+
+    <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
+
+		<!-- Bootstrap CSS -->
+		<!link rel="stylesheet" href="{{ url_for('static', filename='flatly.min.css') }}" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
 </head>
-<body style="background-color: cadetblue;">
-<p>Please provide your details for making a new account.</p>
-<form method=post action="{{ url_for('signup_page') }}">
-    <dl>
-      <dt>Username:
-      <dd><input type=text name=username value="{{
-          request.form.username }}">
-      <dt>Email Address:
-        <dd><input type=email name=email value="{{ request.form.email }}">
-      <dt>Password:
-      <dd><input type=password name=password value="{{
-          request.form.password }}">
-        <dt>Confirm Password:
-        <dd><input type=password name=confirmpassword value="{{ request.form.confirmpassword }}">
-        <dt>Date of Birth:
-        <dd><input type=date name=dob value="{{ request.form.dob }}">
-        <dt>Sex:
-        <dd><input type=radio name=sex value="Male">Male<br>
-            <input type=radio name=sex value="Female">Female<br>
-            <input type=radio name=sex value="Other">Other<br>
-        <dt>Category:
-        <dd>
-        <select name="category" id="registration" onchange="changetextbox(this)" >
-            <option value = "1">New User</option>
-            <option value = "2">New NGO</option>
-        </select>
-        <dt>SIN number of
-        <dd>
-        New NGO:
-        <input type="text" name=NGOReg id="NGOReg" disabled="disabled" />
+<body>
+<div class="container-fluid" id="wrapper">
 
-            <script type="text/javascript">
-                function changetextbox(registration)
-                {
+			<div class="row">
+				<div class="col-lg-4 col-lg-offset-4" id="content">
+                    <p>Please provide your details for making a new account.</p>
+                    <form method=post action="{{ url_for('signup_page') }}">
+                    <dl>
+                    <dt>Username:
+                    <dd><input type=text name=username value="{{
+                    request.form.username }}">
+                    <dt>Email Address:
+                    <dd><input type=email name=email value="{{ request.form.email }}">
+                    <dt>Password:
+                    <dd><input type=password name=password value="{{
+                    request.form.password }}">
+                    <dt>Confirm Password:
+                    <dd><input type=password name=confirmpassword value="{{ request.form.confirmpassword }}">
+                    <dt>Date of Birth:
+                    <dd><input type=date name=dob value="{{ request.form.dob }}">
+                    <dt>Sex:
+                    <dd><input type=radio name=sex value="Male">Male<br>
+                    <input type=radio name=sex value="Female">Female<br>
+                    <input type=radio name=sex value="Other">Other<br>
+                    <dt>Category:
+                    <dd>
+                    <select name="category" id="registration" onchange="changetextbox(this)" >
+                        <option value = "1">New User</option>
+                        <option value = "2">New NGO</option>
+                    </select>
+                    <dt>SIN number of
+                    <dd>
+                    New NGO:
+                    <input type="text" name=NGOReg id="NGOReg" disabled="disabled" />
 
-                        var selectedValue = registration.options[registration.selectedIndex].value;
-                        var txtOther = document.getElementById("NGOReg");
-                        txtOther.disabled = selectedValue == 2 ? false : true;
-                        if (!txtOther.disabled) {
-                        txtOther.focus();
+                    <script type="text/javascript">
+                        function changetextbox(registration)
+                        {
+                            var selectedValue = registration.options[registration.selectedIndex].value;
+                            var txtOther = document.getElementById("NGOReg");
+                            txtOther.disabled = selectedValue == 2 ? false : true;
+                            if (!txtOther.disabled) {
+                            txtOther.focus();
+                            }
                         }
-                }
-            </script>
-    </dl>
-    <p><input type=submit value=SignUp>
-  </form>
+                    </script>
+                    </dl>
+                    <p><input type=submit value=SignUp>
+                </form>
+                </div>
+            </div>
+</div>
 </body>
 </html>
