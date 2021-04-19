@@ -18,6 +18,8 @@ AppMedReq = mongo.db.Medicine_Request_Approval
 AppDonReq = mongo.db.Medicine_Donation_Approval
 
 
+global num
+
 @app.route('/')
 def welcome_page():
     return render_template('welcome_page.html')
@@ -25,6 +27,7 @@ def welcome_page():
 
 @app.route('/login_page', methods=['POST', 'GET'])
 def login_page():
+    global num
     if request.method == 'POST':
 
         get_user = LoginDB.find_one({'Username': request.form['username']})
@@ -95,6 +98,7 @@ def index(input):
 
 @app.route('/complete/<oid>')
 def complete(oid):
+    global num
     try:
         do_item = ngos.find_one({'_id': ObjectId(oid)})
         do_item['complete'] = True
@@ -103,13 +107,20 @@ def complete(oid):
         do_item = modos.find_one({'_id': ObjectId(oid)})
         do_item['complete'] = True
         modos.save(do_item)
-    return redirect(url_for('index'))
+    return redirect(url_for('index', input=num))
+
+@app.route('/medreq/<id>')
+def medreq(id):
+    global num
+    search_meds=modos.find({'ngoID': id})
+    return render_template('ngolist.html', todos=search_meds, type=num)
 
 
 @app.route('/ngo_list')
 def ngo_list():
+    global num
     saved_ngos = ngos.find()
-    return render_template('ngolist.html', todos=saved_ngos)
+    return render_template('ngolist.html', todos=saved_ngos, type=num)
 
 
 @app.route('/med_list')
@@ -125,12 +136,14 @@ def donate():
 
 @app.route('/add_modo', methods=['POST'])
 def add_modo():
+    global num
     new_modo = request.form.get('new-todo')
     new_todo1 = request.form.get('new-todo1')
     new_todo2 = request.form.get('new-todo2')
+    new_todo3 = request.form.get('new-todo3')
 
-    AppDonReq.insert_one({'text': new_modo, 'family': new_todo1, 'ExpDate': new_todo2, 'complete': False})
-    return redirect(url_for('index'))
+    AppDonReq.insert_one({'text': new_modo, 'family': new_todo1, 'ExpDate': new_todo2,'description': new_todo3, 'complete': False})
+    return redirect(url_for('index', input=num))
 
 
 @app.route('/Approve')
