@@ -42,7 +42,14 @@
 										Medicine Donation Form
 									</a>
 								</div>
-							</div>
+                                {% if num|int == 2 %}
+                                    <div class="btn-group" >
+									    <a type="button" href="{{ url_for('Approve') }}" class="btn btn-warning"  >
+										    Approve request
+									    </a>
+                                    </div>
+                                {% endif %}
+                               </div>
 						</div>
 					</div>
 

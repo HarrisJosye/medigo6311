@@ -35,19 +35,13 @@
 						<a href="{{ url_for('Sel_Apv_don', text=todo.text )}}">
 							<li class="list-group-item {% if todo.complete %}todo-completed{% endif %}">
 								{{ todo.text }}
-                                {% if flag == true %}
-                                    <ul>{{ todo.family }}</ul>
-                                    <ul>{{ todo.ExpDate }}</ul>
-                                    <ul>{{ todo.description }}</ul>
-                                {% endif %}
+                                <ul>{{ todo.family }}</ul>
+                                <ul>{{ todo.ExpDate }}</ul>
+                                <ul>{{ todo.description }}</ul>
 							</li>
 						</a>
 						{% endfor %}
 					</ul>
-                {% if flag == true %}
-                            <input type="button" onclick="location.href='{{ url_for( 'Approved_med') }}';" value="Approve" />
-                            <input type="button" onclick="location.href='{{ url_for( 'Declined') }}';" value="Decline" />
-                {% endif %}
 				</div>
 			</div>
 		</div>

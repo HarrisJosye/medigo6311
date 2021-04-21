@@ -29,10 +29,10 @@
 
 			<div class="row">
 				<div class="col-lg-4 col-lg-offset-4" id="content">
-					<h2>Search from NGOs</h2>
+					<h2>List of Available Medicines</h2>
 					<ul class="list-group t20">
 						{% for todo in todos %}
-						<a href="{{ url_for('medreq', id=todo.ngoID )}}">
+						<a href="{{ url_for('ngoreq', id=todo.ngoID )}}">
 							<li class="list-group-item {% if todo.complete %}todo-completed{% endif %}">
 								{{ todo.text }}
 							</li>
