@@ -5,8 +5,7 @@ import re
 
 app = Flask(__name__)
 app.secret_key = 'idontknowitsroleyetbutneedit'
-app.config[
-    'MONGO_URI'] = 'mongodb+srv://mandeepmandla:IAb8tM0lYpp9j5xJ@cluster0.vspam.mongodb.net/MediGO?retryWrites=true&w=majority'
+app.config['MONGO_URI'] = 'mongodb+srv://mandeepmandla:IAb8tM0lYpp9j5xJ@cluster0.vspam.mongodb.net/MediGO?retryWrites=true&w=majority'
 mongo = PyMongo(app)
 LoginDB = mongo.db.Login
 SignupDB = mongo.db.SignUp
@@ -29,14 +28,17 @@ def welcome_page():
 @app.route('/login_page', methods=['POST', 'GET'])
 def login_page():
     global num, ngoID
+    global uid
     if request.method == 'POST':
 
         get_user = LoginDB.find_one({'Username': request.form['username']})
         get_password = LoginDB.find_one({'Password': request.form['password']})
         get_email = LoginDB.find_one({'Email': request.form['username']})
-
+        get_uid = SignupDB.find_one({'Username': request.form['username']})
         get_user_type = SignupDB.find_one({"Username": request.form['username']}, {'Category': 1, '_id': 0})
         num = re.sub("\D", "", str(get_user_type))  # To extract category
+        uid = get_uid['_id']
+        print(uid)
         print(num)
 
         if num == '2':
@@ -102,6 +104,29 @@ def index(input):
     num = input
     return render_template('indexButton.html', num=num)
 
+@app.route('/notification')
+def notification():
+    global uid
+    global num
+
+    print(input)
+    id=uid
+
+    try:
+        app_status = AppMedReq.find_one({'requestedUserID': ObjectId(id)})
+        print(app_status['request'])
+        if app_status['request']=="Approved":
+            notif=1
+        elif app_status['request']=="Declined":
+            notif=0
+        elif app_status['request'] == "tbd":
+            notif = 4
+        else:
+            notif=2
+    except:
+        notif=2
+    return render_template('notification.html',notif=notif, type=num)
+
 
 @app.route('/complete/<oid>')
 def complete(oid):
@@ -149,7 +174,7 @@ def ngo_list():
 @app.route('/med_list')
 def med_list():
     saved_modos = modos.find()
-    return render_template('ngoMedlist.html', todos=saved_modos)
+    return render_template('ngoMedlist.html', todos=saved_modos, type=num)
 
 
 @app.route('/donate')
@@ -160,7 +185,7 @@ def donate():
 def create_request():
     global num
     userId= ObjectId(uid)
-    user_find = LoginDB.find_one({'_id': ObjectId(uid)})
+    user_find = SignupDB.find_one({'_id': ObjectId(uid)})
     new_todo = request.form.get('new-todo')
     new_todo1 = request.form.get('new-todo1')
     new_todo2 = request.form.get('new-todo2')
@@ -168,7 +193,7 @@ def create_request():
     new_todo5 = request.form.get('new-todo5')
 
     AppMedReq.insert_one({'requestedUserID': userId, 'requestedUserName': user_find['Username'], 'recipient':new_todo, 'mailID':new_todo1,'phone':new_todo5,'medicine_name':medicine_name,'MEDquantity':new_todo2,'ngoID':ngoid, 'request':"tbd"})
-    return redirect(url_for('index', input=num))
+    return render_template('notification.html',notif=3, type=num)
 
 
 @app.route('/add_modo', methods=['POST'])
@@ -180,7 +205,7 @@ def add_modo():
     new_todo3 = request.form.get('new-todo3')
 
     AppDonReq.insert_one({'text': new_modo, 'family': new_todo1, 'ExpDate': new_todo2,'description': new_todo3, 'complete': False})
-    return redirect(url_for('index', input=num))
+    return render_template('notification.html',notif=3, type=num)
 
 
 @app.route('/Approve')
