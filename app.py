@@ -2,8 +2,6 @@ from flask import (Flask, flash, redirect, render_template, request, session, ur
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 import re
-from multiprocessing import Process
-import time
 
 app = Flask(__name__)
 app.secret_key = 'idontknowitsroleyetbutneedit'
@@ -16,9 +14,12 @@ ngos = mongo.db.NGOlist
 modos = mongo.db.MedicineList
 AppMedReq = mongo.db.Medicine_Request_Approval
 AppDonReq = mongo.db.Medicine_Donation_Approval
-
+Notification = mongo.db.Notification
 
 global num
+global uid
+global ngoid
+global medicine_name
 
 @app.route('/')
 def welcome_page():
@@ -27,7 +28,7 @@ def welcome_page():
 
 @app.route('/login_page', methods=['POST', 'GET'])
 def login_page():
-    global num
+    global num, ngoID
     if request.method == 'POST':
 
         get_user = LoginDB.find_one({'Username': request.form['username']})
@@ -36,15 +37,20 @@ def login_page():
 
         get_user_type = SignupDB.find_one({"Username": request.form['username']}, {'Category': 1, '_id': 0})
         num = re.sub("\D", "", str(get_user_type))  # To extract category
-
         print(num)
+
+        if num == '2':
+            get_user_NGOID = SignupDB.find_one({"Username": request.form['username']}, {'ngoID': 1, '_id': 0})
+            str_user_NGOID = str(get_user_NGOID)
+            ngoID = str_user_NGOID[11:13]
+            print(ngoID)
 
         if get_user or get_email:
             if get_password:
-                print("Login successful")
                 return redirect(url_for('index', input=num))
         else:
             print("Username or password incorrect.")
+            flash('Username or password incorrect.')
             return redirect(url_for('login_page'))
 
     return render_template('login_page.html')
@@ -69,9 +75,11 @@ def signup_page():
 
         if user_exist or email_exist:
             print("User already exists")
+            flash("User already exists")
             return redirect(url_for('login_page'))
         if password_1 != password_2:
             print("Password and confirm password doesn't match")
+            flash("Password and confirm password doesn't match")
             return redirect(url_for('signup_page'))
         else:
             new_user = (
@@ -92,7 +100,6 @@ def signup_page():
 @app.route('/index/<input>')
 def index(input):
     num = input
-    print(input)
     return render_template('indexButton.html', num=num)
 
 
@@ -112,9 +119,25 @@ def complete(oid):
 @app.route('/medreq/<id>')
 def medreq(id):
     global num
+    global ngoid
+    ngoid = id
     search_meds=modos.find({'ngoID': id})
-    return render_template('ngolist.html', todos=search_meds, type=num)
+    return render_template('medlist.html', todos=search_meds, type=num)
 
+@app.route('/ngoreq/<id>')
+def ngoreq(id):
+    global num
+    global ngoid
+    ngoid = id
+    search_ngos=ngos.find({'ngoID': id})
+    return render_template('medlist.html', todos=search_ngos, type=num)
+
+@app.route('/req_form/<name>')
+def req_form(name):
+    global num
+    global medicine_name
+    medicine_name=name
+    return render_template('request_form.html', type=num)
 
 @app.route('/ngo_list')
 def ngo_list():
@@ -126,12 +149,26 @@ def ngo_list():
 @app.route('/med_list')
 def med_list():
     saved_modos = modos.find()
-    return render_template('ngolist.html', todos=saved_modos)
+    return render_template('ngoMedlist.html', todos=saved_modos)
 
 
 @app.route('/donate')
 def donate():
-    return render_template('medicinedonate.html')
+    return render_template('medicinedonate.html',type=num)
+
+@app.route('/create_request', methods=['POST'])
+def create_request():
+    global num
+    userId= ObjectId(uid)
+    user_find = LoginDB.find_one({'_id': ObjectId(uid)})
+    new_todo = request.form.get('new-todo')
+    new_todo1 = request.form.get('new-todo1')
+    new_todo2 = request.form.get('new-todo2')
+    new_todo3 = request.form.get('new-todo3')
+    new_todo5 = request.form.get('new-todo5')
+
+    AppMedReq.insert_one({'requestedUserID': userId, 'requestedUserName': user_find['Username'], 'recipient':new_todo, 'mailID':new_todo1,'phone':new_todo5,'medicine_name':medicine_name,'MEDquantity':new_todo2,'ngoID':ngoid, 'request':"tbd"})
+    return redirect(url_for('index', input=num))
 
 
 @app.route('/add_modo', methods=['POST'])
@@ -153,14 +190,101 @@ def Approve():
 
 @app.route('/App_req')
 def App_req():
-    Approval_req = AppMedReq.find()
-    return render_template('Approval_med_req.html', todos=Approval_req)
+    global num
+    global flag
+    flag = False
+    Approval_req = AppMedReq.find({'request': 'tbd'})
+    return render_template('Approval_med_req.html', todos=Approval_req, type=num, flag=flag)
 
 
 @app.route('/App_don')
 def App_don():
+    global num
+    global flag
+    flag = False
     Approval_don = AppDonReq.find()
-    return render_template('Approval_don_req.html', todos=Approval_don)
+    return render_template('Approval_don_req.html', todos=Approval_don, type=num, flag=flag)
+
+
+@app.route('/Sel_Apv_don/<text>')
+def Sel_Apv_don(text):
+    global num, flag, name
+    flag = True
+    name = text
+    search_meds = AppDonReq.find({'text': text})
+    return render_template('Approval_don_req.html', todos=search_meds, type=num, flag=flag)
+
+
+@app.route('/Sel_Apv_req/<text>')
+def Sel_Apv_req(text):
+    global num, flag, name
+    flag = True
+    name = text
+    search_meds = AppMedReq.find({'medicine_name': text})
+    return render_template('Approval_med_req.html', todos=search_meds, type=num, flag=flag)
+
+
+@app.route('/Approved')
+def Approved():
+    global num, flag, name
+    flag = True
+    print(name)
+    Approved = AppDonReq.find({'text': name}, {'_id': 0})
+
+    for app in Approved:
+        print(app)
+        modos.insert_one(app)
+        AppDonReq.remove({"text": name})
+
+    return redirect(url_for('index', input=num))
+
+
+@app.route('/Approved_med')
+def Approved_med():
+    global num, flag, name, ngoID
+    flag = True
+    print(name)
+    Approved = AppDonReq.find({'text': name}, {'_id': 0})
+    AppDonReq.find_one_and_update({'text': name}, {'$set': {'ngoID': ngoID}})
+
+    for app in Approved:
+        print(app)
+        modos.insert_one(app)
+        AppDonReq.remove({"text": name})
+
+    return redirect(url_for('index', input=num))
+
+
+@app.route('/Declined')
+def Declined():
+    global num, flag, name
+    flag = True
+    print("Declined")
+    print(name)
+    AppDonReq.remove({"text": name})
+
+    return redirect(url_for('index', input=num))
+
+
+@app.route('/Request_App')
+def Request_App():
+    global num, flag, name
+    flag = True
+    print(name)
+    AppMedReq.find_one_and_update({'medicine_name': name}, {'$set': {'request': 'Approved'}})
+
+    return redirect(url_for('index', input=num))
+
+
+@app.route('/Request_Dec')
+def Request_Dec():
+    global num, flag, name
+    flag = True
+    print("Declined")
+    print(name)
+    AppMedReq.find_one_and_update({'medicine_name': name}, {'$set': {'request': 'Declined'}})
+
+    return redirect(url_for('index', input=num))
 
 
 if __name__ == '__main__':
